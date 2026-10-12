@@ -1,0 +1,4 @@
+{
+	"scm.alwaysShowRepositories": true,
+	"terminal.sourceControlRepositoriesKind": "both"
+}
