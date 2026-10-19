@@ -18,12 +18,13 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='TEAM_15',
-    maintainer_email='team15@aut.ac.nz',
+    maintainer_email='team15@example.com',
     description='ENME703 Team 15 tracking node',
     license='Apache-2.0',
     entry_points={
         'console_scripts': [
             'tracker_two_tb4_TEAM_15 = tracker_TEAM_15.tracker_two_tb4_TEAM_15:main',
+            'tracker_tb3_sim_TEAM_15 = tracker_TEAM_15.tracker_tb3_sim_TEAM_15:main',
         ],
     },
 )
