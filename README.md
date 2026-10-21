@@ -31,7 +31,7 @@ Use Ubuntu 22.04 and ROS 2 Humble. Windows users should run ROS through VS Code 
 ```bash
 git clone https://github.com/diablez/tracker_TEAM_15.git
 cd tracker_TEAM_15
-# Available remotely only after the reviewed commits have been pushed.
+# Review branch; deployment checks below are still required.
 git switch team15/demo-integration-20261021
 source /opt/ros/humble/setup.bash
 rosdep install --from-paths . --ignore-src -r -y --rosdistro humble

@@ -25,10 +25,11 @@
   "physical_hardware": "NOT RUN",
   "schema": "five fields matches lecturer reporting slide; actual October 14 installed type unresolved",
   "main": "unchanged",
-  "push": "not performed",
+  "push": "Authorized branch publication; verify actual remote SHA and draft PR in GitHub",
   "history_scan": {
-    "blobs": 52,
+    "blobs": 94,
     "credential_pattern_matches": 0,
     "generic_path_matches_in_old_bytecode": 5
-  }
+  },
+  "final_rerun": "23 run; 23 passed; 0 failures; 0 errors; 0 skips. Fixed Markdown UTF-8 reading after initial Windows decoding error."
 }

@@ -81,7 +81,33 @@ Choose a new destination; do not force overwrite, reset, auto-stash or switch a 
 2. Recover the October 14 source/installed interface and compare against lecturer/referee consumers. Decide schema deliberately; preserve the known-working lab fallback.
 3. In a separate Humble workspace, build all four packages, inspect installed interfaces/executables and run colcon tests. Verify physical wrapper availability/arguments against the installed fleet version.
 4. Test camera loss/corrupt frames without interruption to pursuit, exact/fallback TF timing, real report/image delivery and five-second cooldown. Then supervise fresh-start Construct and physical moving-target tests; preserve logs and actual images. Check shutdown/cancel handling.
-5. Resolve license/redistribution issues. On approval, push only `team15/demo-integration-20261021` normally, then open a PR against main. This task creates local commits, not a push/PR/merge.
+5. Resolve license/redistribution issues before an open-source release. The authorized publication targets only `team15/demo-integration-20261021` and a draft PR against main; it does not approve a merge or a repository-wide license grant.
 6. Merge only after approval and the required checks. Preserve history and the hardware fallback; never force-push or rewrite main as a synchronization shortcut.
 
 Upstream launch arguments were checked against the official [Humble localization source](https://github.com/turtlebot/turtlebot4/blob/humble/turtlebot4_navigation/launch/localization.launch.py) and [Humble navigation source](https://github.com/turtlebot/turtlebot4/blob/humble/turtlebot4_navigation/launch/nav2.launch.py). Actual installed behaviour still needs testing.
+
+## Final publication review
+
+On 21 October 2026, fetched remote refs confirmed both `main` and the remote
+integration branch at the recorded base. The local branch contained `f2445f8`
+and `b1c8e41`. A plain Windows Python rerun exposed a Markdown-test decoding
+error; explicitly reading UTF-8 fixed it. The rerun passed all 23 tests with
+zero failures, errors or skips. Parsing passed for 30 Python, 4 XML, 3 YAML and
+4 JSON/workspace files, including Python 3.10 grammar checks.
+
+The final credential-pattern scan covered 94 reachable historical blobs and
+the release working tree: no matching credentials were found. The only five
+machine-path findings were previously committed bytecode blobs already on the
+remote base; bytecode is absent from the release tree. No history rewrite was
+performed. Pattern scans are not a guarantee against every possible secret.
+
+The retained Apache-noticed ROS templates now include their accompanying
+license text; see [third-party notices](../THIRD_PARTY_NOTICES.md). No unresolved
+external assets are added. Inherited code permission and repository licensing
+remain explicit gates for an open-source release. The draft PR is for source
+review, not a claim of deployment readiness or resolved licensing.
+
+ROS/Humble build, generated messages/DDS, Gazebo, real cameras, physical
+hardware and the authoritative October 14 message interface remain unvalidated.
+The working hardware fallback remains untouched outside this review checkout;
+its original GitHub version is preserved in base history.

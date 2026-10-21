@@ -19,7 +19,7 @@ class RepositoryTests(unittest.TestCase):
     def test_markdown_relative_links_exist(self):
         for p in ROOT.rglob('*.md'):
             if '.git' in p.parts:continue
-            for target in re.findall(r'\]\(([^)]+)\)',p.read_text()):
+            for target in re.findall(r'\]\(([^)]+)\)',p.read_text(encoding='utf-8')):
                 if '://' in target or target.startswith('#'):continue
                 with self.subTest(file=p.name,target=target):
                     self.assertTrue((p.parent/target.split('#')[0]).exists())
