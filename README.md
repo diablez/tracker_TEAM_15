@@ -2,7 +2,7 @@
 
 TF/Nav2 pursuit and compressed-camera reporting for physical TurtleBot4 robots and The Construct's dual-TurtleBot3 Humble simulation. Canonical repository: [diablez/tracker_TEAM_15](https://github.com/diablez/tracker_TEAM_15).
 
-**Integration review candidate:** this revision has not been built with ROS, launched in Gazebo, or tested on physical robots. Keep the October 14 lab workspace unchanged until deployment checks pass. Missing camera frames never gate pursuit. Empty or fabricated captures are not published.
+**Integration review candidate:** the four packages were built in the separate Construct candidate workspace according to the live-session handoff. On 21 October 2026 the reporter was observed logging real-image report publication and the three Red Nav2 servers were verified active after relaunch. Full pursuit, received-report/image inspection, fresh-start reproduction and physical-robot validation remain separate checks. Keep the October 14 lab workspace unchanged. Missing camera frames never gate pursuit. Empty or fabricated captures are not published.
 
 ## Architecture
 
@@ -72,6 +72,107 @@ ros2 launch tracker_TEAM_15 tracker_two_tb4_TEAM_15.launch.py chaser:=tb402 enem
 After interface/image checks, add `enable_reporting:=true my_id:=2 opp_id:=7 camera_topic:=/tb402/oakd/rgb/preview/image_raw/compressed` to use its internal reporter. Or leave internal reporting disabled and run the separate reporter. New capture checks are not hardware validation and do not replace the lab fallback.
 
 ## Construct / TB3 simulation
+
+### Current Construct session: quick run
+
+Preserve `/home/user/ros2_ws` and its running simulator. The integration overlay is `/home/user/team15_candidate_ws`; do not build another package copy into the original workspace. This is an existing-simulator procedure, not a self-contained world/camera installer.
+
+For a **new, empty candidate workspace only**:
+
+```bash
+mkdir -p ~/team15_candidate_ws/src
+git clone --branch team15/demo-integration-20261021 --single-branch https://github.com/diablez/tracker_TEAM_15.git ~/team15_candidate_ws/src/tracker_TEAM_15
+source /opt/ros/humble/setup.bash
+cd ~/team15_candidate_ws
+rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
+bash src/tracker_TEAM_15/scripts/build_team15.sh "$HOME/team15_candidate_ws"
+```
+
+In **every launch/check terminal**, source the same overlay:
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/team15_candidate_ws/install/setup.bash
+# This hostname belongs to the current Construct environment; confirm it elsewhere.
+export GAZEBO_MASTER_URI=http://4_simulation:11345
+ros2 pkg prefix tracker_TEAM_15
+```
+
+Expected package prefix: `/home/user/team15_candidate_ws/install/tracker_TEAM_15`. Preserve the session's ROS discovery settings. Use simulation time throughout. Check existing processes/nodes first and skip any launch already running; do not start duplicate map, AMCL, Nav2, tracker or reporter instances.
+
+1. Keep the existing two-robot Gazebo simulator and camera-equipped Red model running. The map is an **external original-workspace asset**; verify both the YAML and its referenced image exist:
+
+   ```bash
+   test -r /home/user/ros2_ws/install/localization_server_TEAM_15/share/localization_server_TEAM_15/maps/turtlebot_area_two_robots_clean.yaml
+   ros2 launch localization_server_TEAM_15 multi_localization_TEAM_15.launch.py map:=/home/user/ros2_ws/install/localization_server_TEAM_15/share/localization_server_TEAM_15/maps/turtlebot_area_two_robots_clean.yaml
+   ```
+
+2. In another terminal, open the existing RViz configuration:
+
+   ```bash
+   rviz2 -d ~/ros2_ws/tb3_team15_success.rviz --ros-args -p use_sim_time:=true
+   ```
+
+   Initialize both AMCL poses on `/tb3_0/initialpose` and `/tb3_1/initialpose` using their actual poses in the shared `map`. Check laser/wall alignment and both `map -> tb3_N/odom -> tb3_N/base_link` chains. Gazebo coordinates are not automatically map coordinates. Do not replay the previous teleport coordinates or reset/reposition models to make a check pass.
+
+3. Launch Red navigation once, then check it from another sourced terminal:
+
+   ```bash
+   ros2 launch path_planner_server_TEAM_15 tb3_0_sim_navigation_TEAM_15.launch.py
+   ```
+
+   ```bash
+   for n in bt_navigator planner_server controller_server; do
+     echo "$n"
+     timeout 5s ros2 lifecycle get /tb3_0/$n
+   done
+   ros2 action info /tb3_0/navigate_to_pose
+   timeout 8s ros2 run tf2_ros tf2_echo map tb3_0/base_link
+   timeout 8s ros2 run tf2_ros tf2_echo map tb3_1/base_link
+   ```
+
+   All three lifecycle checks must return `active [3]`. If a server crashes, stop its owning failed Nav2 launch, verify its navigation processes have exited, then relaunch once. Preserve localization, map server and camera. Do not use broad process-kill commands. Recheck lifecycle and map alignment before motion.
+
+4. Preview a goal with `dry_run:=true`, then stop that launch before starting exactly one live client:
+
+   ```bash
+   ros2 launch tracker_TEAM_15 tracker_tb3_sim_TEAM_15.launch.py dry_run:=true use_sim_time:=true
+   # Ctrl-C the preview, then supervise motion:
+   ros2 launch tracker_TEAM_15 tracker_tb3_sim_TEAM_15.launch.py dry_run:=false use_sim_time:=true
+   ```
+
+   Observe accepted goals, action results, fresh TF and actual Red motion. Drift alone is not proof of commanded pursuit. If map/laser alignment is wrong or navigation becomes unhealthy, stop the tracker and cancel any outstanding navigation goal through the active action client/operator controls; stopping this tracker alone does not guarantee goal cancellation.
+
+5. In a separate terminal, run one reporter (the current session already has this in terminal #1):
+
+   ```bash
+   ros2 launch tracker_TEAM_15 capture_report.launch.py enable_reporting:=true use_sim_time:=true my_id:=0 opp_id:=1 image_topic:=/tb3_0/camera/image_raw/compressed allow_latest_tf:=true
+   ```
+
+   `allow_latest_tf` enables the bounded common-time approximation described below; it is not exact image-time TF proof. IDs 0/1 are this simulation's assignments, not universal referee IDs.
+
+### Camera dependency and evidence
+
+The camera-equipped SDF exists only at `~/ros2_ws/TEAM15_HANDOFF_ASSETS/camera_candidate/team15_red_with_camera.sdf` in the original workspace; it is **not bundled in this integration repository**. Its existence and the reporter's image bytes were checked live. A clean clone cannot recreate the camera model from this repository. Manual camera injection/replacement has not been verified as a reproducible procedure and is deliberately not prescribed here; preserve the currently working model.
+
+```bash
+ros2 topic info /tb3_0/camera/image_raw/compressed -v
+timeout 8s ros2 topic hz /tb3_0/camera/image_raw/compressed
+ros2 topic echo /tb3_0/tracker_report --once --field my_id
+ros2 topic echo /tb3_0/tracker_report --once --field rel_dist
+```
+
+Inspect `/tb3_0/tracker_report_img/compressed` in RViz and the actual JPEGs under `~/.ros/team15_captures`. Retain terminal logs, lifecycle results, action results, pose measurements and screenshots with their time/source. A publication log does not prove subscriber delivery, opponent visibility or full assignment completion.
+
+On 21 October the live terminal #1 showed `CAPTURE REPORT PUBLISHED: 8715 bytes, distance=0.478m, rel_yaw=1.2deg`, saved as `/home/user/.ros/team15_captures/capture_my0_opp1_5660_431000000.jpg`, with preceding repeated publications. This witnesses reporter publication with nonempty image data; image contents and downstream delivery were not yet inspected at that checkpoint. Nav2 had previously failed; after a single relaunch all three named servers returned `active [3]`. Earlier handoff reports of approximately 5 Hz camera input and a successful four-package build are prior-session evidence, not a fresh build in this documentation check.
+
+Remaining demonstration gaps include sustained moving-target pursuit, stable navigator operation, confirmed map/Gazebo alignment, inspected opponent-visible photos and downstream report receipt. Physical deployment, authoritative referee schema and licensing remain unresolved as described below. No simulator reset, model replacement or main-branch merge is required by this procedure.
+
+Later in the same live check, one tracker goal `(0.14, -0.78)` was accepted and returned success. All three navigation servers remained active afterwards. A subscriber received `rel_dist=0.46691790223121643`; a saved JPEG preview visibly showed the opponent. Red Gazebo positions changed from `(0.199246, -0.733818)` to `(0.208998, -0.732742)`, but known background drift and the near-current-position goal prevent attributing this small change to pursuit. RViz showed substantial laser/map misalignment, so pursuit was stopped after the completed goal; localization, camera, map and Nav2 were preserved. Sustained pursuit and corrected alignment remain outstanding; report receipt and one opponent-visible image have now been observed, without asserting referee acceptance or exact physical camera geometry.
+
+The existing candidate source's `scripts/check_source.py` was rerun inside Construct: 23 tests passed, no failures/errors/skips; 30 Python, 4 XML, 4 JSON/workspace and 3 YAML files parsed without errors. This is source verification, not `colcon test`. The README-only handoff change passed `git diff --check`; local Windows Python launcher aliases were unavailable, so the source checks were run on the existing remote revision rather than claiming a local rerun of the edited Markdown test.
+
+### General simulation notes
 
 Use the existing two-robot Humble simulator and its supplied map. Worlds, robot meshes and course maps are external because their redistribution provenance was not established. Do not reset an active simulation to install this source.
 
