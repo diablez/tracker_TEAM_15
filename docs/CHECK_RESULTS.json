@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-21",
+  "timezone": "Pacific/Auckland",
+  "base_sha": "a43c7bd5ae852b061bc20face78c1b3fd3f57987",
+  "environment": "Isolated Windows Python 3.12.14; source syntax also parsed for Python 3.10 grammar",
+  "dependencies": {
+    "opencv": "5.0.0",
+    "PyYAML": "6.0.3"
+  },
+  "unit_tests": {
+    "run": 23,
+    "passed": 23,
+    "skipped": 0,
+    "scope": "production policies/timer methods with ROS doubles, decoder, interface and repository checks"
+  },
+  "static_parsing": {
+    "python": 30,
+    "xml": 4,
+    "yaml": 3,
+    "json": 4,
+    "notebooks": 0
+  },
+  "ros_humble_build": "NOT RUN: ROS/colcon absent in available Ubuntu WSL",
+  "gazebo_fresh_start": "NOT RUN: simulator unavailable",
+  "physical_hardware": "NOT RUN",
+  "schema": "five fields matches lecturer reporting slide; actual October 14 installed type unresolved",
+  "main": "unchanged",
+  "push": "not performed",
+  "history_scan": {
+    "blobs": 52,
+    "credential_pattern_matches": 0,
+    "generic_path_matches_in_old_bytecode": 5
+  }
+}
