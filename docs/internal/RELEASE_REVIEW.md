@@ -102,7 +102,7 @@ remote base; bytecode is absent from the release tree. No history rewrite was
 performed. Pattern scans are not a guarantee against every possible secret.
 
 The retained Apache-noticed ROS templates now include their accompanying
-license text; see [third-party notices](../THIRD_PARTY_NOTICES.md). No unresolved
+license text; see [third-party notices](../../THIRD_PARTY_NOTICES.md). No unresolved
 external assets are added. Inherited code permission and repository licensing
 remain explicit gates for an open-source release. The draft PR is for source
 review, not a claim of deployment readiness or resolved licensing.
@@ -127,7 +127,7 @@ for NumPy 1.x. Static parsing reported no errors. The final `colcon test` run
 reported six generated lint tests: four passed, two copyright-template checks
 skipped, and none failed. Formatting failures found in the first colcon run
 were corrected without changing launch behaviour. Exact counts and remaining
-environment limits are in [the machine-readable results](CHECK_RESULTS.json).
+environment limits are in [the machine-readable results](../CHECK_RESULTS.json).
 
 `rosdep check` could not run because the host rosdep database is not
 initialized. Direct package checks found all declared Nav2 dependencies, but
@@ -136,4 +136,4 @@ files build and install but cannot resolve on this host. No simulator or
 physical robot was started. The authoritative report PDF, signed attestation,
 October 14 workspace and lecturer/referee installed interface were not found;
 the resulting evidence gaps are itemized in the
-[discrepancy review](REPORT_REPOSITORY_DISCREPANCIES.md).
+[discrepancy review](../REPORT_REPOSITORY_DISCREPANCIES.md).

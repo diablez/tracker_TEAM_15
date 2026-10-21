@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-21",
+  "date": "2026-10-22",
   "timezone": "Pacific/Auckland",
   "branch": "audit/ros2-humble-packaging",
   "base_sha": "b88fa06c2f0b272b278443484d73b685fa66228a",
@@ -14,7 +14,7 @@
     "scope": "production policies/timer methods with ROS doubles, decoder, interface, repository and Markdown-link checks"
   },
   "static_parsing": {
-    "python": 30,
+    "python": 31,
     "xml": 4,
     "yaml": 3,
     "json_and_workspace": 9,
@@ -42,6 +42,11 @@
     "configuration_files": 3,
     "simulation_launch_argument_checks": "passed",
     "physical_wrapper_argument_checks": "blocked: turtlebot4_navigation is not installed on this host"
+  },
+  "documentation_checks": {
+    "relative_links": "passed",
+    "mermaid_architecture": "source reviewed; GitHub rendering not available locally",
+    "alignment_svg": "regenerated from two preserved JSON-formatted logs and parsed as XML"
   },
   "rosdep": "BLOCKED: host rosdep database is not initialized; dependency package presence was checked directly",
   "dependency_presence": {

@@ -24,7 +24,7 @@ requirements can be checked. Broader packaging/organization work was stopped.
 
 The canonical main branch already contains the earlier integration, release
 review, and bounded Construct evidence. Read [the previous review](RELEASE_REVIEW.md)
-and [live validation record](CONSTRUCT_VALIDATION_20261021.md) as historical
+and [live validation record](../CONSTRUCT_VALIDATION_20261021.md) as historical
 evidence, not new testing in this checkpoint.
 
 The other Team 15 repository was inspected read-only through GitHub. Its main
