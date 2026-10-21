@@ -5,6 +5,7 @@
   <description>Team 15 physical and simulated Nav2 launch configuration.</description>
   <maintainer email="team15@example.com">TEAM_15</maintainer>
   <license>LicenseRef-Team15-Pending</license>
+  <buildtool_depend>ament_python</buildtool_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
@@ -21,4 +22,9 @@
   <exec_depend>nav2_behaviors</exec_depend>
   <exec_depend>nav2_bt_navigator</exec_depend>
   <exec_depend>nav2_lifecycle_manager</exec_depend>
+  <exec_depend>nav2_navfn_planner</exec_depend>
+  <exec_depend>dwb_core</exec_depend>
+  <exec_depend>dwb_critics</exec_depend>
+  <exec_depend>nav2_costmap_2d</exec_depend>
+  <exec_depend>nav2_behavior_tree</exec_depend>
 </package>
