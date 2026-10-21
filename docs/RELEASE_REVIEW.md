@@ -111,3 +111,29 @@ ROS/Humble build, generated messages/DDS, Gazebo, real cameras, physical
 hardware and the authoritative October 14 message interface remain unvalidated.
 The working hardware fallback remains untouched outside this review checkout;
 its original GitHub version is preserved in base history.
+
+## Final laptop audit verification
+
+The audit branch was checked again on 21 October 2026 in an isolated Ubuntu
+22.04 ROS 2 Humble workspace. All four packages built successfully. The
+generated five-field interface, four tracker executables, seven launch files
+and three YAML configurations were present in the install tree. Simulation
+launch descriptions resolved from installed package shares and exposed their
+arguments without starting nodes.
+
+The source suite ran 23 tests: 22 passed and the OpenCV decoder test skipped
+because this host combines a NumPy 2.2.6 runtime with an OpenCV extension built
+for NumPy 1.x. Static parsing reported no errors. The final `colcon test` run
+reported six generated lint tests: four passed, two copyright-template checks
+skipped, and none failed. Formatting failures found in the first colcon run
+were corrected without changing launch behaviour. Exact counts and remaining
+environment limits are in [the machine-readable results](CHECK_RESULTS.json).
+
+`rosdep check` could not run because the host rosdep database is not
+initialized. Direct package checks found all declared Nav2 dependencies, but
+`turtlebot4_navigation` is absent. Consequently, the physical wrapper launch
+files build and install but cannot resolve on this host. No simulator or
+physical robot was started. The authoritative report PDF, signed attestation,
+October 14 workspace and lecturer/referee installed interface were not found;
+the resulting evidence gaps are itemized in the
+[discrepancy review](REPORT_REPOSITORY_DISCREPANCIES.md).

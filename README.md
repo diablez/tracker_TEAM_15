@@ -2,7 +2,7 @@
 
 TF/Nav2 pursuit and compressed-camera reporting for physical TurtleBot4 robots and The Construct's dual-TurtleBot3 Humble simulation. Canonical repository: [diablez/tracker_TEAM_15](https://github.com/diablez/tracker_TEAM_15).
 
-**Integration review candidate:** the four packages were built in the separate Construct candidate workspace according to the live-session handoff. On 21 October 2026 the reporter was observed logging real-image report publication and the three Red Nav2 servers were verified active after relaunch. Full pursuit, received-report/image inspection, fresh-start reproduction and physical-robot validation remain separate checks. Keep the October 14 lab workspace unchanged. Missing camera frames never gate pursuit. Empty or fabricated captures are not published.
+**Verified scope:** the four packages build from a clean checkout under the local ROS 2 Humble environment. Earlier Construct evidence records report publication, receipt of one non-empty opponent-visible image and one successful 13.3 cm forward Nav2 manoeuvre. It does not establish sustained pursuit, a reproducible fresh simulator start, calibrated camera geometry, referee compatibility or physical-hardware compatibility. Missing camera frames never gate pursuit; empty or fabricated captures are not published.
 
 **Latest live validation (21 October):** laser/map misalignment was corrected by initializing AMCL in the measured map coordinate system; the course map and simulator models were preserved. Median latest-scan error fell to about 2.2 cm for both robots. One forward Nav2 goal produced 13.3 cm of commanded motion and succeeded. Rearward manoeuvring timed out and was explicitly cancelled; sustained moving-target pursuit remains unverified. See [measured evidence and corrected initialization procedure](docs/CONSTRUCT_VALIDATION_20261021.md).
 
@@ -33,14 +33,14 @@ Use Ubuntu 22.04 and ROS 2 Humble. Windows users should run ROS through VS Code 
 ```bash
 git clone https://github.com/diablez/tracker_TEAM_15.git
 cd tracker_TEAM_15
-# Review branch; deployment checks below are still required.
-git switch team15/demo-integration-20261021
 source /opt/ros/humble/setup.bash
 rosdep install --from-paths . --ignore-src -r -y --rosdistro humble
 bash scripts/build_team15.sh
 source install/setup.bash
 ros2 pkg executables tracker_TEAM_15
 ```
+
+These commands use the default `main` branch. The project is not a complete simulator distribution: its course map, world, meshes, camera-equipped model and RViz preset are external. Package names containing uppercase `TEAM_15` are retained identities and cause non-fatal ROS naming warnings.
 
 Four ROS packages live at repository root. Alternatively clone once beneath an outer colcon workspace's `src` directory and pass that workspace to the build script. Do not build duplicate copies of the same packages.
 
@@ -83,7 +83,7 @@ For a **new, empty candidate workspace only**:
 
 ```bash
 mkdir -p ~/team15_candidate_ws/src
-git clone --branch team15/demo-integration-20261021 --single-branch https://github.com/diablez/tracker_TEAM_15.git ~/team15_candidate_ws/src/tracker_TEAM_15
+git clone https://github.com/diablez/tracker_TEAM_15.git ~/team15_candidate_ws/src/tracker_TEAM_15
 source /opt/ros/humble/setup.bash
 cd ~/team15_candidate_ws
 rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
@@ -168,7 +168,7 @@ Inspect `/tb3_0/tracker_report_img/compressed` in RViz and the actual JPEGs unde
 
 On 21 October the live terminal #1 showed `CAPTURE REPORT PUBLISHED: 8715 bytes, distance=0.478m, rel_yaw=1.2deg`, saved as `/home/user/.ros/team15_captures/capture_my0_opp1_5660_431000000.jpg`, with preceding repeated publications. This witnesses reporter publication with nonempty image data; image contents and downstream delivery were not yet inspected at that checkpoint. Nav2 had previously failed; after a single relaunch all three named servers returned `active [3]`. Earlier handoff reports of approximately 5 Hz camera input and a successful four-package build are prior-session evidence, not a fresh build in this documentation check.
 
-Remaining demonstration gaps include sustained moving-target pursuit, stable navigator operation, confirmed map/Gazebo alignment, inspected opponent-visible photos and downstream report receipt. Physical deployment, authoritative referee schema and licensing remain unresolved as described below. No simulator reset, model replacement or main-branch merge is required by this procedure.
+Remaining demonstration gaps include sustained moving-target pursuit, repeatability from a fresh launch and calibrated camera geometry. Physical deployment, authoritative referee schema and licensing remain unresolved as described below. No simulator reset or model replacement is required by this procedure.
 
 Later in the same live check, one tracker goal `(0.14, -0.78)` was accepted and returned success. All three navigation servers remained active afterwards. A subscriber received `rel_dist=0.46691790223121643`; a saved JPEG preview visibly showed the opponent. Red Gazebo positions changed from `(0.199246, -0.733818)` to `(0.208998, -0.732742)`, but known background drift and the near-current-position goal prevent attributing this small change to pursuit. RViz showed substantial laser/map misalignment, so pursuit was stopped after the completed goal; localization, camera, map and Nav2 were preserved. Sustained pursuit and corrected alignment remain outstanding; report receipt and one opponent-visible image have now been observed, without asserting referee acceptance or exact physical camera geometry.
 
@@ -246,6 +246,8 @@ colcon test-result --verbose
 
 Unit tests substitute clocks, TF and publishers while exercising production policies/timer methods. The decoder test uses OpenCV/numpy; install the declared dependencies or it reports a skip. Tests do not prove DDS, message generation, Gazebo or hardware behaviour. [Review evidence and merge procedure](docs/RELEASE_REVIEW.md) records tests actually run.
 
+The final audit results, including separate source-suite and `colcon test` counts, are recorded in [`docs/CHECK_RESULTS.json`](docs/CHECK_RESULTS.json). Use the [requirements and deployment checklist](docs/DEPLOYMENT_CHECKLIST.md) before demonstration or physical use. The [report/repository discrepancy table](docs/REPORT_REPOSITORY_DISCREPANCIES.md) separates unresolved group-report claims from verified repository evidence.
+
 Before a demonstration pass: build four packages; compare report schemas; verify both AMCL/TF chains, the camera and clocks; inspect a dry-run goal; supervise moving-opponent pursuit; inspect action results and post-goal poses; verify report delivery and an image visibly showing the opponent; repeat after five seconds.
 
 - No camera: pursuit continues. Check topic type, QoS and compressed transport; never supply blank images.
@@ -258,3 +260,7 @@ Before a demonstration pass: build four packages; compare report schemas; verify
 ## Redistribution
 
 No course PDFs, private email, lab photos, downloaded archives, robot meshes or maps are included. External ROS packages stay upstream. Repository-level licensing and inherited course-code rights remain for the team to confirm before advertising an open-source release; package metadata is not a complete license grant. See [public release review](docs/RELEASE_REVIEW.md#public-release).
+
+## Project history
+
+Terence Xu developed the initial TF-based opponent tracking and pursuit-goal implementation, which Dibya Karki subsequently extended through integration, navigation-goal handling, capture/reporting development, testing and repository consolidation. This brief history does not replace or modify the team's signed contribution attestation.

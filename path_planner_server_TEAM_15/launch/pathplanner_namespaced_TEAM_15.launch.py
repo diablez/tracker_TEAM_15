@@ -1,4 +1,5 @@
-"""Physical TB4: delegate to the installed namespaced TurtleBot4 Nav2 stack.
+"""
+Physical TB4: delegate to the installed namespaced TurtleBot4 Nav2 stack.
 
 The original TEAM15 handwritten Nav2 templates contained placeholders and the
 old custom YAMLs are not tested on assessed hardware. Do not launch both stacks.

@@ -16,7 +16,10 @@ def generate_launch_description():
     map_file = LaunchConfiguration('map')
 
     nodes = [
-        DeclareLaunchArgument('map', description='Absolute path to the external Construct two-robot map YAML'),
+        DeclareLaunchArgument(
+            'map',
+            description='Absolute path to the external Construct map YAML',
+        ),
         Node(
             package="nav2_map_server",
             executable="map_server",

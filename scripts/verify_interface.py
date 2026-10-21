@@ -5,6 +5,18 @@ from pathlib import Path
 import sys
 
 
+ROSIDL_TYPE_ALIASES = {
+    'float32': 'float',
+    'float64': 'double',
+}
+
+
+def canonical_type(kind):
+    """Return the rosidl runtime spelling for a source message type."""
+    kind = kind.replace('/msg/', '/')
+    return ROSIDL_TYPE_ALIASES.get(kind, kind)
+
+
 def fields(text):
     result = []
     for line in text.splitlines():
@@ -13,7 +25,7 @@ def fields(text):
             parts = clean.split()
             if len(parts) != 2:
                 raise ValueError('Expected unbounded two-token message field')
-            result.append((parts[0].replace('/msg/', '/'), parts[1]))
+            result.append((canonical_type(parts[0]), parts[1]))
     return result
 
 
@@ -31,7 +43,7 @@ def main():
         return 1
     if args.installed:
         from tracker_interfaces_team_15.msg import TrackerReport
-        installed = [(kind.replace('/msg/', '/'), name)
+        installed = [(canonical_type(kind), name)
                      for name, kind in TrackerReport.get_fields_and_field_types().items()]
         if installed != expected:
             print(f'INCOMPATIBLE installed type: {installed}', file=sys.stderr)
