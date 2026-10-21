@@ -4,6 +4,8 @@ TF/Nav2 pursuit and compressed-camera reporting for physical TurtleBot4 robots a
 
 **Integration review candidate:** the four packages were built in the separate Construct candidate workspace according to the live-session handoff. On 21 October 2026 the reporter was observed logging real-image report publication and the three Red Nav2 servers were verified active after relaunch. Full pursuit, received-report/image inspection, fresh-start reproduction and physical-robot validation remain separate checks. Keep the October 14 lab workspace unchanged. Missing camera frames never gate pursuit. Empty or fabricated captures are not published.
 
+**Latest live validation (21 October):** laser/map misalignment was corrected by initializing AMCL in the measured map coordinate system; the course map and simulator models were preserved. Median latest-scan error fell to about 2.2 cm for both robots. One forward Nav2 goal produced 13.3 cm of commanded motion and succeeded. Rearward manoeuvring timed out and was explicitly cancelled; sustained moving-target pursuit remains unverified. See [measured evidence and corrected initialization procedure](docs/CONSTRUCT_VALIDATION_20261021.md).
+
 ## Architecture
 
 Both robots must be localized in one shared `map`, with separate namespaced `odom` and base frames. Pursuit reads their TF poses, calculates a goal 0.5 m behind the opponent and submits it to `/<chaser>/navigate_to_pose`. Nav2 handles planning and obstacle avoidance. Camera reporting separately checks received images, geometry, timestamps and TF.

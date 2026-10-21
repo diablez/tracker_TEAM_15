@@ -1,0 +1,43 @@
+test_bounded_common_time_fallback (test_capture.PolicyTests) ... ok
+test_empty_missing_frame_and_metadata (test_capture.PolicyTests) ... ok
+test_exact_time (test_capture.PolicyTests) ... ok
+test_fallback_common_time_unavailable (test_capture.PolicyTests) ... ok
+test_fallback_disabled (test_capture.PolicyTests) ... ok
+test_fallback_rejects_skew_stale_future_and_unstamped (test_capture.PolicyTests) ... ok
+test_five_field_schema_and_optional_header (test_capture.PolicyTests) ... ok
+test_front_range_and_nonfinite (test_capture.PolicyTests) ... ok
+test_geometry_rear (test_capture.PolicyTests) ... ok
+test_real_decoder_corrupt_and_valid (test_capture.PolicyTests) ... ok
+test_five_second_boundary (test_capture.TimerTests) ... ok
+test_missing_tf_skips (test_capture.TimerTests) ... ok
+test_no_camera_disabled_stale_future_reused_and_cooldown (test_capture.TimerTests) ... ok
+test_physical_corrupt_frame_discards_cache (test_capture.TimerTests) ... ok
+test_physical_missing_camera_report_returns (test_capture.TimerTests) ... ok
+test_physical_pursuit_without_camera (test_capture.TimerTests) ... ok
+test_valid_capture (test_capture.TimerTests) ... ok
+test_header_and_field_order_are_not_wire_compatible (test_interface.InterfaceTests) ... ok
+test_lecturer_slide_fields (test_interface.InterfaceTests) ... ok
+test_json_workspace_is_portable (test_repository.RepositoryTests) ... ok
+test_markdown_relative_links_exist (test_repository.RepositoryTests) ... ok
+test_physical_dependencies_declared (test_repository.RepositoryTests) ... ok
+test_preserved_executable_registrations (test_repository.RepositoryTests) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.860s
+
+OK
+{
+  "static": {
+    "python": 30,
+    "xml": 4,
+    "json": 4,
+    "yaml": 3,
+    "yaml_skipped": 0,
+    "notebooks": 0
+  },
+  "errors": [],
+  "tests": 23,
+  "failures": 0,
+  "test_errors": 0,
+  "skips": 0
+}
