@@ -1,116 +1,24 @@
+"""Physical TB4: delegate to the installed namespaced TurtleBot4 Nav2 stack.
+
+The original TEAM15 handwritten Nav2 templates contained placeholders and the
+old custom YAMLs are not tested on assessed hardware. Do not launch both stacks.
+"""
 import os
-
 from ament_index_python.packages import get_package_share_directory
-
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
-
-from launch_ros.actions import Node
-
-
-def launch_setup(context):
-
-    robot_namespace = LaunchConfiguration("namespace").perform(context)
-
-    config_dir = os.path.join(
-        get_package_share_directory("path_planner_server_TEAM_15"),
-        "config"
-    )
-
-    planner_server_yaml = os.path.join(
-        config_dir, f"{robot_namespace}_planner_server.yaml"
-    )
-
-    controller_yaml = os.path.join(
-        config_dir, f"{robot_namespace}_controller.yaml"
-    )
-
-    bt_navigator_yaml = os.path.join(
-        config_dir, f"{robot_namespace}_bt_navigator.yaml"
-    )
-
-    recovery_yaml = os.path.join(
-        config_dir, f"{robot_namespace}_recovery.yaml"
-    )
-
-    behavior_xml = os.path.join(
-        config_dir, "behavior.xml"
-    )
-
-    return [
-
-        Node(
-            namespace=robot_namespace,
-            package="nav2_planner",
-            executable="planner_server",
-            name="planner_server",
-            output="screen",
-            parameters=[planner_server_yaml]
-        ),
-
-        Node(
-            namespace=robot_namespace,
-            package="nav2_controller",
-            executable="controller_server",
-            name="controller_server",
-            output="screen",
-            parameters=[controller_yaml]
-        ),
-
-        Node(
-            namespace=robot_namespace,
-            package="nav2_behaviors",
-            executable="behavior_server",
-            name="recoveries_server",
-            output="screen",
-            parameters=[recovery_yaml]
-        ),
-
-        Node(
-            namespace=robot_namespace,
-            package="nav2_bt_navigator",
-            executable="bt_navigator",
-            name="bt_navigator",
-            output="screen",
-            parameters=[
-                bt_navigator_yaml,
-                {"default_nav_to_pose_bt_xml": behavior_xml}
-            ]
-        ),
-
-        Node(
-            namespace=robot_namespace,
-            package="nav2_lifecycle_manager",
-            executable="lifecycle_manager",
-            name="lifecycle_manager_pathplanner",
-            output="screen",
-            parameters=[
-                {"autostart": True},
-                {"bond_timeout": 0.0},
-                {
-                    "node_names": [
-                        "controller_server",
-                        "planner_server",
-                        "recoveries_server",
-                        "bt_navigator"
-                    ]
-                }
-            ]
-        )
-    ]
 
 
 def generate_launch_description():
-
+    launch_file = os.path.join(get_package_share_directory('turtlebot4_navigation'),
+                               'launch', 'nav2.launch.py')
     return LaunchDescription([
-
-        DeclareLaunchArgument(
-            "namespace",
-            default_value="",
-            description="Robot namespace"
+        DeclareLaunchArgument('namespace', default_value='tb402'),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(launch_file),
+            launch_arguments={'namespace': LaunchConfiguration('namespace'),
+                              'use_sim_time': 'false'}.items(),
         ),
-
-        OpaqueFunction(function=launch_setup)
-
     ])

@@ -1,12 +1,12 @@
-tb402/amcl:
+tb3_1/amcl:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
     alpha1: 0.2
     alpha2: 0.2
     alpha3: 0.2
     alpha4: 0.2
     alpha5: 0.2
-    base_frame_id: "tb402/base_link"
+    base_frame_id: "tb3_1/base_footprint"
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
@@ -20,7 +20,7 @@ tb402/amcl:
     max_beams: 60
     max_particles: 1000
     min_particles: 200
-    odom_frame_id: "tb402/odom"
+    odom_frame_id: "tb3_1/odom"
     pf_err: 0.05
     pf_z: 0.99
     recovery_alpha_fast: 0.0
@@ -37,7 +37,7 @@ tb402/amcl:
     z_max: 0.05
     z_rand: 0.5
     z_short: 0.05
-    scan_topic: "scan_copy"
+    scan_topic: "/tb3_1/scan"
     map_topic: "/map"
 #     # set_initial_pose: true
 #     # initial_pose: 

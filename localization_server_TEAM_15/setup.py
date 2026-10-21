@@ -15,14 +15,15 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
         (os.path.join('share', package_name, 'config'), glob('config/*')),
+        (os.path.join('share', package_name, 'maps'), glob('maps/*')),
 
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='user',
-    maintainer_email='user@todo.todo',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='TEAM_15',
+    maintainer_email='team15@example.com',
+    description='Team 15 shared-map localization launch files.',
+    license='LicenseRef-Team15-Pending',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

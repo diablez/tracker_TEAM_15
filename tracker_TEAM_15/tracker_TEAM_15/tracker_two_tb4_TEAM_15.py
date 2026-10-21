@@ -2,6 +2,7 @@
 
 import math
 import re
+import time
 
 import rclpy
 from rclpy.node import Node
@@ -16,6 +17,8 @@ from tf2_ros import Buffer, TransformListener, TransformBroadcaster
 from tf_transformations import euler_from_quaternion, quaternion_from_euler
 
 from tracker_interfaces_team_15.msg import TrackerReport
+from .capture_policy import (image_valid, decode_image, pose_pair,
+                             capture_geometry, populate_report, stamp_ns)
 
 
 class TrackerTwoTB4(Node):
@@ -31,8 +34,20 @@ class TrackerTwoTB4(Node):
         self.enemy = self.get_parameter('enemy').value
         self.global_frame = self.get_parameter('global_frame').value
 
-        self.my_id = self.robot_id_from_name(self.chaser)
-        self.opp_id = self.robot_id_from_name(self.enemy)
+        self.enable_reporting = bool(self.declare_parameter('enable_reporting', False).value)
+        self.my_id = int(self.declare_parameter('my_id', -1).value)
+        self.opp_id = int(self.declare_parameter('opp_id', -1).value)
+        if self.enable_reporting and not (0 <= self.my_id <= 255 and 0 <= self.opp_id <= 255 and self.my_id != self.opp_id):
+            raise ValueError('Distinct uint8 report IDs required')
+        self.max_image_age = float(self.declare_parameter('max_image_age_sec', 1.0).value)
+        self.max_tf_image_skew = float(self.declare_parameter('max_tf_image_skew_sec', 0.25).value)
+        self.allow_latest_tf = bool(self.declare_parameter('allow_latest_tf', False).value)
+        self.last_report_mono = -float('inf')
+        self.last_report_stamp = -1
+        self.image_received_mono = -float('inf')
+        for value in (self.max_image_age, self.max_tf_image_skew):
+            if not math.isfinite(value) or value < 0:
+                raise ValueError('Image/TF timing bounds must be finite and nonnegative')
 
         self.chaser_base = f'{self.chaser}/base_link'
         self.enemy_base = f'{self.enemy}/base_link'
@@ -61,20 +76,10 @@ class TrackerTwoTB4(Node):
 
         self.last_report_time = self.get_clock().now()
 
-        # TurtleBot4 OAK-D compressed RGB camera.
-        # Construct currently has no publisher on this topic, but
-        # the same code can run unchanged on the real TurtleBot4.
-        self.camera_topic = (
-            f'/{self.chaser}/oakd/rgb/preview/image_raw/compressed'
-        )
-
+        self.camera_topic = str(self.declare_parameter(
+            'camera_topic', f'/{self.chaser}/oakd/rgb/preview/image_raw/compressed').value)
         self.latest_image = None
         self.camera_received_logged = False
-
-        # The Construct TB3 simulation has no camera publisher.
-        # Real TurtleBot4 operation must have a valid image before
-        # a capture report is sent.
-        self.allow_empty_image = self.chaser.startswith('tb3_')
 
         self.camera_sub = self.create_subscription(
             CompressedImage,
@@ -95,6 +100,7 @@ class TrackerTwoTB4(Node):
         )
 
         self.timer = self.create_timer(0.5, self.update_goal)
+        self.report_timer = self.create_timer(0.2, self.check_report)
 
         self.get_logger().info(
             f'TEAM 15 tracker started: '
@@ -111,7 +117,13 @@ class TrackerTwoTB4(Node):
         return 0
 
     def tracker_image_callback(self, msg):
+        self.latest_image = None
+        if not self.enable_reporting:
+            return
+        if not image_valid(msg) or not decode_image(msg):
+            return
         self.latest_image = msg
+        self.image_received_mono = time.monotonic()
 
         if not self.camera_received_logged:
             self.get_logger().info(
@@ -233,33 +245,6 @@ class TrackerTwoTB4(Node):
         )
 
         # ---------------------------------------------------------
-        # REPORTING TEST
-        # ---------------------------------------------------------
-        # In simulation, publish when the chaser is reasonably close
-        # to the intended 0.5 m tracking distance.
-        # 5 second cooldown matches the game hit cooldown.
-        # ---------------------------------------------------------
-
-        elapsed = (
-            self.get_clock().now() - self.last_report_time
-        ).nanoseconds / 1e9
-
-        image_ready = (
-            self.latest_image is not None
-            or self.allow_empty_image
-        )
-
-        if (
-            0.40 <= rel_dist <= 0.60
-            and in_operating_zone
-            and opponent_in_camera
-            and image_ready
-            and elapsed >= 5.0
-        ):
-            self.publish_report(rel_dist, rel_orient)
-            self.last_report_time = self.get_clock().now()
-
-        # ---------------------------------------------------------
         # NAV2 GOAL UPDATE
         # ---------------------------------------------------------
 
@@ -289,39 +274,36 @@ class TrackerTwoTB4(Node):
             self.last_goal_y = goal_y
             self.last_goal_yaw = goal_yaw
 
-    def publish_report(self, rel_dist, rel_orient):
-
-        msg = TrackerReport()
-
-        msg.my_id = int(self.my_id)
-        msg.opp_id = int(self.opp_id)
-
-        if self.latest_image is not None:
-            msg.image = self.latest_image
-            image_status = 'YES'
-        else:
-            # Construct simulation has no camera publisher.
-            msg.image = CompressedImage()
-            image_status = 'NO'
-
-        msg.rel_dist = float(rel_dist)
-        msg.rel_orient = float(rel_orient)
-
-        self.report_pub.publish(msg)
-
-        # Publish the same captured image separately as required
-        # by the lecturer template for RViz/image visualisation.
-        if self.latest_image is not None:
-            self.report_image_pub.publish(self.latest_image)
-
-        self.get_logger().info(
-            f'Report published: '
-            f'my_id={self.my_id}, '
-            f'opp_id={self.opp_id}, '
-            f'distance={rel_dist:.2f} m, '
-            f'orientation={rel_orient:.1f} deg, '
-            f'image={image_status}'
-        )
+    def check_report(self):
+        # Reporting failure never returns from or gates the pursuit timer.
+        if not self.enable_reporting or self.latest_image is None:
+            return
+        image = self.latest_image
+        stamp = stamp_ns(image.header)
+        mono = time.monotonic()
+        now_ns = self.get_clock().now().nanoseconds
+        if (stamp <= self.last_report_stamp or mono-self.last_report_mono < 5.0
+                or mono-self.image_received_mono > self.max_image_age
+                or not 0 <= (now_ns-stamp)/1e9 <= self.max_image_age):
+            return
+        def lookup(target, source, when):
+            try:
+                return self.tf_buffer.lookup_transform(target, source, when)
+            except Exception as error:
+                raise ValueError(str(error)) from error
+        try:
+            pair, _ = pose_pair(
+                lookup, self.global_frame, (self.chaser_base, self.enemy_base),
+                image.header.stamp, now_ns, lambda ns: Time(nanoseconds=ns), Time(),
+                allow_latest=self.allow_latest_tf, max_skew_sec=self.max_tf_image_skew)
+            distance, orientation = capture_geometry(*pair)
+            report = populate_report(TrackerReport(), image, self.my_id, self.opp_id,
+                                     distance, orientation)
+            self.report_pub.publish(report)
+            self.report_image_pub.publish(image)
+            self.last_report_mono, self.last_report_stamp = mono, stamp
+        except Exception as error:
+            self.get_logger().debug(f'Capture skipped; pursuit continues: {error}')
 
     def broadcast_goal_frame(self, x, y, yaw):
 

@@ -19,10 +19,10 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='user',
-    maintainer_email='user@todo.todo',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='TEAM_15',
+    maintainer_email='team15@example.com',
+    description='Team 15 physical and simulated Nav2 launch configuration.',
+    license='LicenseRef-Team15-Pending',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

@@ -1,18 +1,24 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>path_planner_server_TEAM_15</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="user@todo.todo">user</maintainer>
-  <license>TODO: License declaration</license>
-
+  <description>Team 15 physical and simulated Nav2 launch configuration.</description>
+  <maintainer email="team15@example.com">TEAM_15</maintainer>
+  <license>LicenseRef-Team15-Pending</license>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
-
   <export>
     <build_type>ament_python</build_type>
   </export>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>turtlebot4_navigation</exec_depend>
+  <exec_depend>nav2_controller</exec_depend>
+  <exec_depend>nav2_planner</exec_depend>
+  <exec_depend>nav2_behaviors</exec_depend>
+  <exec_depend>nav2_bt_navigator</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
 </package>

@@ -1,61 +1,28 @@
+"""Physical TB4: use the installed TurtleBot4 localisation launch, not a template.
+
+Requires the actual physical arena map path; this is intentionally not the
+Construct simulation map. The physical system must still be field-tested.
+"""
 import os
-
 from ament_index_python.packages import get_package_share_directory
-
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
-
-from launch_ros.actions import Node
-
-
-def launch_setup(context):
-
-    robot_namespace = LaunchConfiguration("namespace").perform(context)
-
-    nav2_yaml = os.path.join(
-        get_package_share_directory("localization_server_TEAM_15"),
-        "config",
-        f"{robot_namespace}_amcl_config.yaml"
-    )
-
-    return [
-
-        Node(
-            namespace=robot_namespace,
-            package="nav2_amcl",
-            executable="amcl",
-            name="amcl",
-            output="screen",
-            parameters=[nav2_yaml]
-        ),
-
-        Node(
-            namespace=robot_namespace,
-            package="nav2_lifecycle_manager",
-            executable="lifecycle_manager",
-            name="lifecycle_manager_localization",
-            output="screen",
-            parameters=[
-                {"use_sim_time": False},
-                {"autostart": True},
-                {"bond_timeout": 0.0},
-                {"node_names": ["amcl"]}
-            ]
-        )
-    ]
 
 
 def generate_launch_description():
-
+    launch_file = os.path.join(get_package_share_directory('turtlebot4_navigation'),
+                               'launch', 'localization.launch.py')
     return LaunchDescription([
-
-        DeclareLaunchArgument(
-            "namespace",
-            default_value="",
-            description="Robot namespace"
+        DeclareLaunchArgument('namespace', default_value='tb402'),
+        DeclareLaunchArgument('map', description='Absolute path to mapped physical arena YAML'),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(launch_file),
+            launch_arguments={
+                'namespace': LaunchConfiguration('namespace'),
+                'map': LaunchConfiguration('map'),
+                'use_sim_time': 'false',
+            }.items(),
         ),
-
-        OpaqueFunction(function=launch_setup)
-
     ])
