@@ -5,6 +5,7 @@
   <description>Team 15 shared-map localization launch files.</description>
   <maintainer email="team15@example.com">TEAM_15</maintainer>
   <license>LicenseRef-Team15-Pending</license>
+  <buildtool_depend>ament_python</buildtool_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

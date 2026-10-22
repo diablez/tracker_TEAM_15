@@ -1,4 +1,5 @@
-"""Physical TB4: use the installed TurtleBot4 localisation launch, not a template.
+"""
+Physical TB4: use the installed TurtleBot4 localisation launch, not a template.
 
 Requires the actual physical arena map path; this is intentionally not the
 Construct simulation map. The physical system must still be field-tested.

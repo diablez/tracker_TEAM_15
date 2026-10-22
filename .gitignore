@@ -6,6 +6,9 @@ __pycache__/
 .pytest_cache/
 .coverage
 .venv/
+.uv-cache/
+*.egg-info/
+dist/
 venv/
 .ipynb_checkpoints/
 .env
