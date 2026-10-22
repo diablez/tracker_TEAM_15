@@ -68,7 +68,10 @@ def render(before, after):
     parts.extend([
         '<rect x="300" y="405" width="16" height="16" fill="#c0392b"/><text class="axis" x="324" y="418">Before correction</text>',
         '<rect x="480" y="405" width="16" height="16" fill="#1f8a70"/><text class="axis" x="504" y="418">After correction</text>',
-        '<text class="sub" x="450" y="450" text-anchor="middle">Within 10 cm: Red 24.8% → 96.3%; Green 32.0% → 96.2%</text>',
+        (f'<text class="sub" x="450" y="450" text-anchor="middle">'
+         f'Within 10 cm: Red {before["0"]["within_10_pct"]:.1f}% → {after["0"]["within_10_pct"]:.1f}%; '
+         f'Green {before["1"]["within_10_pct"]:.1f}% → {after["1"]["within_10_pct"]:.1f}%'
+         '</text>'),
         '</svg>',
     ])
     return '\n'.join(parts) + '\n'
